@@ -8,3 +8,14 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Environment file
+.env
+
+# Personal Notes
+NOTES.md
+
+# Data
+data
+data/extracted_data
+data/timescaledb
