@@ -35,7 +35,7 @@ def get_db_connection():
 
 # -------------------- Save-Fetch Date --------------------
 
-def save_and_fetch_date(filepath: str = "./ingestion/last-run.json") -> str:
+def save_and_fetch_date(filepath: str = "./data/ingestion_state/last_run.json") -> str:
     try:
         current_date = datetime.now()
         last_run_data = {'date': current_date.strftime('%Y-%m-%d')}

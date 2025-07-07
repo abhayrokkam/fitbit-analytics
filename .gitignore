@@ -20,3 +20,8 @@ testing.ipynb
 data
 data/extracted_data
 data/timescaledb
+
+# Logs
+app.log
+*.log
+*.log*
