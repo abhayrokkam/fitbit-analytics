@@ -1,0 +1,6 @@
+# cronjob
+
+# Run script.py every day at 6:00 AM
+0 6 * * * /usr/local/bin/python /app/ingest.py > /proc/1/fd/1 2>/proc/1/fd/2
+
+# An empty line is required at the end of a cron file for it to be valid.

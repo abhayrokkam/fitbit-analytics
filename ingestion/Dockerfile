@@ -1,20 +1,23 @@
-FROM python:3.12-slim-buster
+FROM python:3.12-slim
 
+# Working Directory
 WORKDIR /app
 
-RUN apt-get update &&  apt-get install -y \
-    postgresql-client \
-    cron \
-    gnupg \
-    && rm -rf /var/lib/apt/lists/*
+# Update apt and install cron, remove apt lists
+RUN apt-get update &&  apt-get install -y cron && rm -rf /var/lib/apt/lists/*
 
-COPY ../pyproject.toml .
-RUN pip install --no-cache-dir -r pyproject.toml
+# First, install libraries for caching
+COPY pyproject.toml .
+RUN pip install .
 
-COPY ingest.py .
+# Copying files 
+COPY ingestion/ingest.py .
+COPY modules/ ./modules
+COPY cronjob /etc/cron.d/daily-cron
 
-RUN echo "0 1 * * * python /app/ingest.py >> /proc/1/fd/1 2>> /proc/1/fd/2" > /etc/cron.d/fitbit-ingestion-cron \
-    chmod 0644 /etc/cron.d/fitbit-ingestion-cron \
-    crontab /etc/cron.d/fitbit-ingestion-cron
+# Permissions
+RUN chmod 0644 /etc/cron.d/daily-cron
 
+# Run commands
+RUN crontab /etc/cron.d/daily-cron
 CMD ["cron", "-f"]

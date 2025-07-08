@@ -92,7 +92,7 @@ def main():
 
             cursor.execute(
                 """
-                INSERT INTO hr_data (time, heart_rate)
+                INSERT INTO raw_data (time, heart_rate)
                 VALUES (%s, %s)
                 """,
                 (timestamp, heart_rate)
