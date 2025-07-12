@@ -3,11 +3,37 @@ services:
     build:
       context: .
       dockerfile: ./ingestion/Dockerfile
-    container_name: python-cron
+    container_name: ingestion-cron
     volumes:
       - ./data/ingestion_state:/app/data/ingestion_state/
+    env_file:
+      - .env
     depends_on:
       - timescaledb:
+
+  frontend:
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+    container_name: frontend-dashboard
+    ports:
+      - "8501:8501"
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    container_name: backend-api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=timescaledb
+    depends_on:
+      - timescaledb
 
   timescaledb:
     image: timescale/timescaledb:latest-pg16
