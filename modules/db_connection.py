@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 import psycopg2
 from psycopg2.extensions import connection
-from logging_config import setup_logger
+from .logging_config import setup_logger
 
 # -------------------- Setup --------------------
 
