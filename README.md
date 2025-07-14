@@ -17,10 +17,12 @@ The Fitbit Charge provides high-resolution intraday data (up to 1-second interva
   - [Why TimescaleDB?](#why-timescaledb)
   - [Architecture](#architecture)
   - [Database Schema](#database-schema)
-  - [Guide to Code](#guide-to-code)
-    - [Prerequisites:](#prerequisites)
-    - [Installation](#installation)
-    - [Configuration](#configuration)
+- [Phase 2: API and Dashboard](#phase-2-api-and-dashboard)
+  - [Additional Architecture](#additional-architecture)
+- [Guide to Code](#guide-to-code)
+  - [Prerequisites:](#prerequisites)
+  - [Installation](#installation)
+  - [Configuration](#configuration)
 
 # Phase 1: Ingestion Flow
 
@@ -76,16 +78,40 @@ SELECT create_hypertable('raw_data', 'time', if_not_exists => TRUE);
 
 - `heart_rate` (DOUBLE PRECISION): Stores the beats-per-minute value for the corresponding timestamp.
 
-## Guide to Code
+# Phase 2: API and Dashboard
+
+This phase focuses on building a data-serving API and a corresponding frontend dashboard to visualize the time-series data stored in TimescaleDB.
+
+## Additional Architecture
+
+The architecture is composed of three main components orchestrated by Docker Compose: a backend API, a frontend dashboard, and the existing time-series database.
+
+- Backend (FastAPI): A Python-based backend using the FastAPI framework. It runs in its own Docker container (`backend-api`) and is responsible for exposing a RESTful API endpoint. This endpoint receives requests from the frontend, queries the TimescaleDB database for the requested data, and returns it in a structured JSON format. The service listens on port `8000`.
+
+- Frontend (Streamlit): A simple and interactive data visualization dashboard built with Streamlit. It operates in a dedicated Docker container (`frontend-dashboard`) and is exposed on port `8501`. The user can select parameters like User ID, metric, and a date range. The dashboard then communicates with the backend API to fetch and display the data in a line chart and a raw data table.
+
+- Database Schema: The existing `raw_data` table in TimescaleDB is used to serve the data. The schema remains unchanged from Phase 1, storing data with `client_id`, `time`, `metric`, and `value`. This hypertable structure is optimized for the time-based queries performed by the backend.
+
+```sql
+CREATE TABLE IF NOT EXISTS raw_data (
+    client_id   TEXT                NOT NULL,
+    time        TIMESTAMPTZ         NOT NULL,
+    metric      TEXT                NOT NULL,
+    value       DOUBLE PRECISION    NOT NULL
+);
+SELECT create_hypertable('raw_data', 'time', if_not_exists => TRUE);
+```
+
+# Guide to Code
 
 Follow these instructions to get the project up and running locally.
 
-### Prerequisites:
+## Prerequisites:
 
 - Docker: [Install Docker](https://docs.docker.com/engine/install/)
 - Docker Compose: [Install Docker Compose](https://docs.docker.com/compose/install/)
 
-### Installation
+## Installation
 
 1. Clone the Repository
 
@@ -119,24 +145,27 @@ Follow these instructions to get the project up and running locally.
     docker-compose up --build -d
     ```
     This command will:
-    - Build the `ingestion` service Docker images.
+    - Build three Docker images.
     - Pull the `timescaledb` image.
-    - STart both containers. The ingestion container will wait until its scheduled cron time to run the script.
+    - Start all four services and connect them on a shared network.
+    - The `ingestion` container will run its script daily based on the cron schedule (6:00 AM UTC).
 
-5. Verify the Setup
+5. Accessing the Application
     
-    You can check the logs to see the output from the services.
+    Once the containers are running, you can access the different parts of the application:
+    - Frontend Dashboard: Open your web browser and navigate to `http://localhost:8501`. Here you can visualize the data.
+    - Backend API Docs: The FastAPI backend provides interactive documentation. Access it by navigating to `http://localhost:8000/docs`.
     
+    Verify and Manage the Setup:
+    - You can check the logs to see the output from each service.
     ```bash
-    # Logs of ingestion service
-    docker-compose logs -f ingestion
+    # Logs for specific service (e.g., frontend)
+    docker-compose logs -f frontend
 
-    # Logs for the database
-    docker-compose logs -f timescaledb
-    ``` 
-    To connect to the databse directly, you can use a PostgreSQL client like `psql`.
+    # Available services: ingestion, frontend, backend, timescaledb
+    ```
 
-### Configuration
+## Configuration
 
 All configurations are managed through the `.env` file.
 

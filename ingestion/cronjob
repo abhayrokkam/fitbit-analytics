@@ -1,5 +1,4 @@
-* * * * * /bin/echo "Cron is working!" > /tmp/cron_output.log 2>&1
+0 6 * * * /usr/local/bin/python3 /app/ingest.py > /proc/1/fd/1 2>/proc/1/fd/2
 
-# 50 17 * * * /usr/local/bin/python3 /app/ingest.py > /proc/1/fd/1 2>/proc/1/fd/2
 # Running ingestion script everyday at 6:00 AM
 
