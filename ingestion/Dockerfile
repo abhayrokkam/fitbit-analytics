@@ -18,5 +18,8 @@ COPY ingestion/cronjob /etc/cron.d/daily-cron
 # Permissions
 RUN chmod 0644 /etc/cron.d/daily-cron
 
-# Run command
+# Load the job
+RUN crontab /etc/cron.d/daily-cron
+
+# Start cron daemon in foreground
 CMD ["cron", "-f"]
