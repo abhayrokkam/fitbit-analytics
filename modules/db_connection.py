@@ -11,7 +11,7 @@ logger = setup_logger(__name__)
 
 # -------------------- Database Connection --------------------
 
-def get_db_connection():
+def get_db_connection() -> connection:
     try:
         conn = psycopg2.connect(
             dbname=os.getenv("DB_NAME"),

@@ -55,17 +55,16 @@ if st.sidebar.button("Fetch Data"):
 
             # Process and display the data
             api_response = response.json()
+
             data = api_response.get('data', [])
 
             if data:
                 df = pd.DataFrame(data)
+
                 df['time'] = pd.to_datetime(df['time'])
-                
+
                 st.subheader(f"Heart Rate for {user_id}")
-                st.line_chart(df.set_index('time')['heart_rate'])
-                
-                st.subheader("Raw Data")
-                st.dataframe(df)
+                st.line_chart(df, x="time", y="value")
             else:
                 st.warning("No data returned from the API for the selected range.")
 

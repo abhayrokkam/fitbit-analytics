@@ -3,7 +3,7 @@ import json
 from dotenv import load_dotenv
 
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import timedelta, date
 
 import wearipedia
 
@@ -15,25 +15,30 @@ from modules.db_connection import get_db_connection
 load_dotenv()
 logger = setup_logger(__name__)
 
+INGESTION_STATE_DIR = "./data/ingestion_state/"
+LAST_RUN_FILE = os.path.join(INGESTION_STATE_DIR, "last_run.json")
+
 # -------------------- Save-Fetch Date --------------------
 
-def save_and_fetch_date(filepath: str = "./data/ingestion_state/last_run.json") -> str:
+def save_and_fetch_date() -> str:
     try:
-        # Current date
-        current_date = datetime.now()
-        last_run_data = {'date': current_date.strftime('%Y-%m-%d')}
+        os.makedirs(INGESTION_STATE_DIR, exist_ok=True)
 
-        # Save to file
+        filepath = LAST_RUN_FILE
+        today_date = date.today()
+        yesterday_date = today_date - timedelta(days=1)
+        yesterday_date_str = yesterday_date.strftime('%Y-%m-%d')
+
+        # Write today's date
+        output_data = {"date": today_date.strftime('%Y-%m-%d')}
         with open(filepath, 'w') as f:
-            json.dump(last_run_data, f, indent=4)
-        logger.info(f"[INFO] Save current date: {current_date}")
+            json.dump(output_data, f, indent=4)
+        logger.info(f"[INFO] Data processed for date: {yesterday_date_str}")
 
-        # Previous date for return
-        previous_date = (current_date-timedelta(days=1)).strftime('%Y-%m-%d')
-        logger.debug(f"[DEBUG] Returning previous date: {previous_date}")
-        return str(previous_date)
+        # Return yesterday's date
+        return yesterday_date_str
     except Exception as e:
-        logger.error(f"[ERROR] Unexpected error with saving-and-fetching dates")
+        logger.error(f"[ERROR] Unexpected error with saving-and-fetching dates: {e}")
         raise e
 
 # -------------------- Main --------------------

@@ -13,6 +13,7 @@ RUN pip install .
 # Copying files 
 COPY ingestion/ingest.py .
 COPY modules/ ./modules
+COPY .env .env
 COPY ingestion/cronjob /etc/cron.d/daily-cron
 
 # Permissions
